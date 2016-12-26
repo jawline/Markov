@@ -70,7 +70,7 @@ fn main() {
 
 	m.finalize();
 
-	for _ in 0..100 {
+	for _ in 0..100000000 {
 		print!("{} ", m.next());
 	}
 }
