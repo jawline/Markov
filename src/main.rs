@@ -91,6 +91,10 @@ impl Markov {
 	    nword
 	}
 
+	/**
+	 * The initial state and final state is padded with the transition "\n" -> "\n"
+	 * This creates a loop so that follows[prefix] will always be non-empty
+	 */
 	fn pad(&mut self) {
 		for _ in 0..self.leading {
 			self.add("\n");

@@ -1,9 +1,769 @@
-A hash map implementation which uses linear probing with Robin Hood bucket stealing.
+logo
+std::collections
 
-By default, HashMap uses a hashing algorithm selected to provide resistance against HashDoS attacks. The algorithm is randomly seeded, and a reasonable best-effort is made to generate this seed from a high quality, secure source of randomness provided by the host without blocking the program. Because of this, the randomness of the seed is dependant on the quality of the system's random number generator at the time it is created. In particular, seeds generated when the system's entropy pool is abnormally low such as during system boot may be of a lower quality.
+Modules
 
-The default hashing algorithm is currently SipHash 1-3, though this is subject to change at any point in the future. While its performance is very competitive for medium sized keys, other hashing algorithms will outperform it for small keys such as integers as well as large keys such as long strings, though those algorithms will typically not protect against attacks such as HashDoS.
+binary_heap
+btree_map
+btree_set
+hash_map
+hash_set
+linked_list
+range
+vec_deque
+Structs
 
-The hashing algorithm can be replaced on a per-HashMap basis using the HashMap::default, HashMap::with_hasher, and HashMap::with_capacity_and_hasher methods. Many alternative algorithms are available on crates.io, such as the fnv crate.
+BTreeMap
+BTreeSet
+BinaryHeap
+HashMap
+HashSet
+LinkedList
+VecDeque
+Enums
 
-It is required that the keys implement the Eq and Hash traits, although this can frequently be achieved by using #[derive(PartialEq, Eq, Hash)]. If you implement these yourself, it is important that the following property holds:
+Bound
+ 
+Click or press ‘S’ to search, ‘?’ for more options…
+Struct std::collections::VecDeque1.0.0 [−] [src]
+
+pub struct VecDeque<T> { /* fields omitted */ }
+[−]
+VecDeque is a growable ring buffer, which can be used as a double-ended queue efficiently.
+
+The "default" usage of this type as a queue is to use push_back to add to the queue, and pop_front to remove from the queue. extend and append push onto the back in this manner, and iterating over VecDeque goes front to back.
+
+Methods
+
+impl<T> VecDeque<T>
+fn new() -> VecDeque<T>[−]
+
+Creates an empty VecDeque.
+
+Examples
+
+use std::collections::VecDeque;
+
+let vector: VecDeque<u32> = VecDeque::new();Run
+fn with_capacity(n: usize) -> VecDeque<T>[−]
+
+Creates an empty VecDeque with space for at least n elements.
+
+Examples
+
+use std::collections::VecDeque;
+
+let vector: VecDeque<u32> = VecDeque::with_capacity(10);Run
+fn get(&self, index: usize) -> Option<&T>[−]
+
+Retrieves an element in the VecDeque by index.
+
+Element at index 0 is the front of the queue.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(3);
+buf.push_back(4);
+buf.push_back(5);
+assert_eq!(buf.get(1), Some(&4));Run
+fn get_mut(&mut self, index: usize) -> Option<&mut T>[−]
+
+Retrieves an element in the VecDeque mutably by index.
+
+Element at index 0 is the front of the queue.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(3);
+buf.push_back(4);
+buf.push_back(5);
+if let Some(elem) = buf.get_mut(1) {
+    *elem = 7;
+}
+
+assert_eq!(buf[1], 7);Run
+fn swap(&mut self, i: usize, j: usize)[−]
+
+Swaps elements at indices i and j.
+
+i and j may be equal.
+
+Fails if there is no element with either index.
+
+Element at index 0 is the front of the queue.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(3);
+buf.push_back(4);
+buf.push_back(5);
+buf.swap(0, 2);
+assert_eq!(buf[0], 5);
+assert_eq!(buf[2], 3);Run
+fn capacity(&self) -> usize[−]
+
+Returns the number of elements the VecDeque can hold without reallocating.
+
+Examples
+
+use std::collections::VecDeque;
+
+let buf: VecDeque<i32> = VecDeque::with_capacity(10);
+assert!(buf.capacity() >= 10);Run
+fn reserve_exact(&mut self, additional: usize)[−]
+
+Reserves the minimum capacity for exactly additional more elements to be inserted in the given VecDeque. Does nothing if the capacity is already sufficient.
+
+Note that the allocator may give the collection more space than it requests. Therefore capacity can not be relied upon to be precisely minimal. Prefer reserve if future insertions are expected.
+
+Panics
+
+Panics if the new capacity overflows usize.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf: VecDeque<i32> = vec![1].into_iter().collect();
+buf.reserve_exact(10);
+assert!(buf.capacity() >= 11);Run
+fn reserve(&mut self, additional: usize)[−]
+
+Reserves capacity for at least additional more elements to be inserted in the given VecDeque. The collection may reserve more space to avoid frequent reallocations.
+
+Panics
+
+Panics if the new capacity overflows usize.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf: VecDeque<i32> = vec![1].into_iter().collect();
+buf.reserve(10);
+assert!(buf.capacity() >= 11);Run
+fn shrink_to_fit(&mut self)1.5.0[−]
+
+Shrinks the capacity of the VecDeque as much as possible.
+
+It will drop down as close as possible to the length but the allocator may still inform the VecDeque that there is space for a few more elements.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::with_capacity(15);
+buf.extend(0..4);
+assert_eq!(buf.capacity(), 15);
+buf.shrink_to_fit();
+assert!(buf.capacity() >= 4);Run
+fn truncate(&mut self, len: usize)[−]
+
+Unstable (deque_extras #27788): matches collection reform specification; waiting on panic semantics
+Shortens a VecDeque, dropping excess elements from the back.
+
+If len is greater than the VecDeque's current length, this has no effect.
+
+Examples
+
+#![feature(deque_extras)]
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(5);
+buf.push_back(10);
+buf.push_back(15);
+buf.truncate(1);
+assert_eq!(buf.len(), 1);
+assert_eq!(Some(&5), buf.get(0));Run
+fn iter(&self) -> Iter<T>[−]
+
+Returns a front-to-back iterator.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(5);
+buf.push_back(3);
+buf.push_back(4);
+let b: &[_] = &[&5, &3, &4];
+let c: Vec<&i32> = buf.iter().collect();
+assert_eq!(&c[..], b);Run
+fn iter_mut(&mut self) -> IterMut<T>[−]
+
+Returns a front-to-back iterator that returns mutable references.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(5);
+buf.push_back(3);
+buf.push_back(4);
+for num in buf.iter_mut() {
+    *num = *num - 2;
+}
+let b: &[_] = &[&mut 3, &mut 1, &mut 2];
+assert_eq!(&buf.iter_mut().collect::<Vec<&mut i32>>()[..], b);Run
+fn as_slices(&self) -> (&[T], &[T])1.5.0[−]
+
+Returns a pair of slices which contain, in order, the contents of the VecDeque.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut vector = VecDeque::new();
+
+vector.push_back(0);
+vector.push_back(1);
+vector.push_back(2);
+
+assert_eq!(vector.as_slices(), (&[0, 1, 2][..], &[][..]));
+
+vector.push_front(10);
+vector.push_front(9);
+
+assert_eq!(vector.as_slices(), (&[9, 10][..], &[0, 1, 2][..]));Run
+fn as_mut_slices(&mut self) -> (&mut [T], &mut [T])1.5.0[−]
+
+Returns a pair of slices which contain, in order, the contents of the VecDeque.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut vector = VecDeque::new();
+
+vector.push_back(0);
+vector.push_back(1);
+
+vector.push_front(10);
+vector.push_front(9);
+
+vector.as_mut_slices().0[0] = 42;
+vector.as_mut_slices().1[0] = 24;
+assert_eq!(vector.as_slices(), (&[42, 10][..], &[24, 1][..]));Run
+fn len(&self) -> usize[−]
+
+Returns the number of elements in the VecDeque.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut v = VecDeque::new();
+assert_eq!(v.len(), 0);
+v.push_back(1);
+assert_eq!(v.len(), 1);Run
+fn is_empty(&self) -> bool[−]
+
+Returns true if the buffer contains no elements
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut v = VecDeque::new();
+assert!(v.is_empty());
+v.push_front(1);
+assert!(!v.is_empty());Run
+fn drain<R>(&mut self, range: R) -> Drain<T> 
+where R: RangeArgument<usize>
+1.6.0[−]
+
+Create a draining iterator that removes the specified range in the VecDeque and yields the removed items.
+
+Note 1: The element range is removed even if the iterator is not consumed until the end.
+
+Note 2: It is unspecified how many elements are removed from the deque, if the Drain value is not dropped, but the borrow it holds expires (eg. due to mem::forget).
+
+Panics
+
+Panics if the starting point is greater than the end point or if the end point is greater than the length of the vector.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut v: VecDeque<_> = vec![1, 2, 3].into_iter().collect();
+assert_eq!(vec![3].into_iter().collect::<VecDeque<_>>(), v.drain(2..).collect());
+assert_eq!(vec![1, 2].into_iter().collect::<VecDeque<_>>(), v);
+
+// A full range clears all contents
+v.drain(..);
+assert!(v.is_empty());Run
+fn clear(&mut self)[−]
+
+Clears the buffer, removing all values.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut v = VecDeque::new();
+v.push_back(1);
+v.clear();
+assert!(v.is_empty());Run
+fn contains(&self, x: &T) -> bool 
+where T: PartialEq<T>
+1.12.0[−]
+
+Returns true if the VecDeque contains an element equal to the given value.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut vector: VecDeque<u32> = VecDeque::new();
+
+vector.push_back(0);
+vector.push_back(1);
+
+assert_eq!(vector.contains(&1), true);
+assert_eq!(vector.contains(&10), false);Run
+fn front(&self) -> Option<&T>[−]
+
+Provides a reference to the front element, or None if the sequence is empty.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut d = VecDeque::new();
+assert_eq!(d.front(), None);
+
+d.push_back(1);
+d.push_back(2);
+assert_eq!(d.front(), Some(&1));Run
+fn front_mut(&mut self) -> Option<&mut T>[−]
+
+Provides a mutable reference to the front element, or None if the sequence is empty.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut d = VecDeque::new();
+assert_eq!(d.front_mut(), None);
+
+d.push_back(1);
+d.push_back(2);
+match d.front_mut() {
+    Some(x) => *x = 9,
+    None => (),
+}
+assert_eq!(d.front(), Some(&9));Run
+fn back(&self) -> Option<&T>[−]
+
+Provides a reference to the back element, or None if the sequence is empty.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut d = VecDeque::new();
+assert_eq!(d.back(), None);
+
+d.push_back(1);
+d.push_back(2);
+assert_eq!(d.back(), Some(&2));Run
+fn back_mut(&mut self) -> Option<&mut T>[−]
+
+Provides a mutable reference to the back element, or None if the sequence is empty.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut d = VecDeque::new();
+assert_eq!(d.back(), None);
+
+d.push_back(1);
+d.push_back(2);
+match d.back_mut() {
+    Some(x) => *x = 9,
+    None => (),
+}
+assert_eq!(d.back(), Some(&9));Run
+fn pop_front(&mut self) -> Option<T>[−]
+
+Removes the first element and returns it, or None if the sequence is empty.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut d = VecDeque::new();
+d.push_back(1);
+d.push_back(2);
+
+assert_eq!(d.pop_front(), Some(1));
+assert_eq!(d.pop_front(), Some(2));
+assert_eq!(d.pop_front(), None);Run
+fn push_front(&mut self, value: T)[−]
+
+Inserts an element first in the sequence.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut d = VecDeque::new();
+d.push_front(1);
+d.push_front(2);
+assert_eq!(d.front(), Some(&2));Run
+fn push_back(&mut self, value: T)[−]
+
+Appends an element to the back of a buffer
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(1);
+buf.push_back(3);
+assert_eq!(3, *buf.back().unwrap());Run
+fn pop_back(&mut self) -> Option<T>[−]
+
+Removes the last element from a buffer and returns it, or None if it is empty.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+assert_eq!(buf.pop_back(), None);
+buf.push_back(1);
+buf.push_back(3);
+assert_eq!(buf.pop_back(), Some(3));Run
+fn swap_remove_back(&mut self, index: usize) -> Option<T>1.5.0[−]
+
+Removes an element from anywhere in the VecDeque and returns it, replacing it with the last element.
+
+This does not preserve ordering, but is O(1).
+
+Returns None if index is out of bounds.
+
+Element at index 0 is the front of the queue.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+assert_eq!(buf.swap_remove_back(0), None);
+buf.push_back(1);
+buf.push_back(2);
+buf.push_back(3);
+
+assert_eq!(buf.swap_remove_back(0), Some(1));
+assert_eq!(buf.len(), 2);
+assert_eq!(buf[0], 3);
+assert_eq!(buf[1], 2);Run
+fn swap_remove_front(&mut self, index: usize) -> Option<T>1.5.0[−]
+
+Removes an element from anywhere in the VecDeque and returns it, replacing it with the first element.
+
+This does not preserve ordering, but is O(1).
+
+Returns None if index is out of bounds.
+
+Element at index 0 is the front of the queue.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+assert_eq!(buf.swap_remove_front(0), None);
+buf.push_back(1);
+buf.push_back(2);
+buf.push_back(3);
+
+assert_eq!(buf.swap_remove_front(2), Some(3));
+assert_eq!(buf.len(), 2);
+assert_eq!(buf[0], 2);
+assert_eq!(buf[1], 1);Run
+fn insert(&mut self, index: usize, value: T)1.5.0[−]
+
+Inserts an element at index within the VecDeque. Whichever end is closer to the insertion point will be moved to make room, and all the affected elements will be moved to new positions.
+
+Element at index 0 is the front of the queue.
+
+Panics
+
+Panics if index is greater than VecDeque's length
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(10);
+buf.push_back(12);
+buf.insert(1, 11);
+assert_eq!(Some(&11), buf.get(1));Run
+fn remove(&mut self, index: usize) -> Option<T>[−]
+
+Removes and returns the element at index from the VecDeque. Whichever end is closer to the removal point will be moved to make room, and all the affected elements will be moved to new positions. Returns None if index is out of bounds.
+
+Element at index 0 is the front of the queue.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(1);
+buf.push_back(2);
+buf.push_back(3);
+
+assert_eq!(buf.remove(1), Some(2));
+assert_eq!(buf.get(1), Some(&3));Run
+fn split_off(&mut self, at: usize) -> VecDeque<T>1.4.0[−]
+
+Splits the collection into two at the given index.
+
+Returns a newly allocated Self. self contains elements [0, at), and the returned Self contains elements [at, len).
+
+Note that the capacity of self does not change.
+
+Element at index 0 is the front of the queue.
+
+Panics
+
+Panics if at > len
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf: VecDeque<_> = vec![1,2,3].into_iter().collect();
+let buf2 = buf.split_off(1);
+// buf = [1], buf2 = [2, 3]
+assert_eq!(buf.len(), 1);
+assert_eq!(buf2.len(), 2);Run
+fn append(&mut self, other: &mut VecDeque<T>)1.4.0[−]
+
+Moves all the elements of other into Self, leaving other empty.
+
+Panics
+
+Panics if the new number of elements in self overflows a usize.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf: VecDeque<_> = vec![1, 2, 3].into_iter().collect();
+let mut buf2: VecDeque<_> = vec![4, 5, 6].into_iter().collect();
+buf.append(&mut buf2);
+assert_eq!(buf.len(), 6);
+assert_eq!(buf2.len(), 0);Run
+fn retain<F>(&mut self, f: F) 
+where F: FnMut(&T) -> bool
+1.4.0[−]
+
+Retains only the elements specified by the predicate.
+
+In other words, remove all elements e such that f(&e) returns false. This method operates in place and preserves the order of the retained elements.
+
+Examples
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.extend(1..5);
+buf.retain(|&x| x%2 == 0);
+
+let v: Vec<_> = buf.into_iter().collect();
+assert_eq!(&v[..], &[2, 4]);Run
+impl<T> VecDeque<T> where T: Clone
+fn resize(&mut self, new_len: usize, value: T)[−]
+
+Unstable (deque_extras #27788): matches collection reform specification; waiting on panic semantics
+Modifies the VecDeque in-place so that len() is equal to new_len, either by removing excess elements or by appending copies of a value to the back.
+
+Examples
+
+#![feature(deque_extras)]
+
+use std::collections::VecDeque;
+
+let mut buf = VecDeque::new();
+buf.push_back(5);
+buf.push_back(10);
+buf.push_back(15);
+buf.resize(2, 0);
+buf.resize(6, 20);
+for (a, b) in [5, 10, 20, 20, 20, 20].iter().zip(&buf) {
+    assert_eq!(a, b);
+}Run
+Trait Implementations
+
+impl<T> Drop for VecDeque<T>
+fn drop(&mut self)[−]
+
+A method called when the value goes out of scope. Read more
+
+impl<A> Hash for VecDeque<A> where A: Hash
+fn hash<H>(&self, state: &mut H) 
+where H: Hasher
+[−]
+
+Feeds this value into the state given, updating the hasher as necessary.
+
+fn hash_slice<H>(data: &[Self], state: &mut H) 
+where H: Hasher
+1.3.0[−]
+
+Feeds a slice of this type into the state provided.
+
+impl<T> Debug for VecDeque<T> where T: Debug
+fn fmt(&self, f: &mut Formatter) -> Result<(), Error>[−]
+
+Formats the value using the given formatter.
+
+impl<T> From<Vec<T>> for VecDeque<T>1.10.0
+fn from(other: Vec<T>) -> VecDeque<T>[−]
+
+Performs the conversion.
+
+impl<A> PartialEq<VecDeque<A>> for VecDeque<A> where A: PartialEq<A>
+fn eq(&self, other: &VecDeque<A>) -> bool[−]
+
+This method tests for self and other values to be equal, and is used by ==. Read more
+
+fn ne(&self, other: &Rhs) -> bool[−]
+
+This method tests for !=.
+
+impl<T> IntoIterator for VecDeque<T>
+type Item = T
+
+The type of the elements being iterated over.
+
+type IntoIter = IntoIter<T>
+
+Which kind of iterator are we turning this into?
+
+fn into_iter(self) -> IntoIter<T>[−]
+
+Consumes the list into a front-to-back iterator yielding elements by value.
+
+impl<'a, T> IntoIterator for &'a VecDeque<T>
+type Item = &'a T
+
+The type of the elements being iterated over.
+
+type IntoIter = Iter<'a, T>
+
+Which kind of iterator are we turning this into?
+
+fn into_iter(self) -> Iter<'a, T>[−]
+
+Creates an iterator from a value. Read more
+
+impl<'a, T> IntoIterator for &'a mut VecDeque<T>
+type Item = &'a mut T
+
+The type of the elements being iterated over.
+
+type IntoIter = IterMut<'a, T>
+
+Which kind of iterator are we turning this into?
+
+fn into_iter(self) -> IterMut<'a, T>[−]
+
+Creates an iterator from a value. Read more
+
+impl<A> Extend<A> for VecDeque<A>
+fn extend<T>(&mut self, iter: T) 
+where T: IntoIterator<Item=A>
+[−]
+
+Extends a collection with the contents of an iterator. Read more
+
+impl<'a, T> Extend<&'a T> for VecDeque<T> where T: Copy + 'a1.2.0
+fn extend<I>(&mut self, iter: I) 
+where I: IntoIterator<Item=&'a T>
+[−]
+
+Extends a collection with the contents of an iterator. Read more
+
+impl<A> Index<usize> for VecDeque<A>
+type Output = A
+
+The returned type after indexing
+
+fn index(&self, index: usize) -> &A[−]
+
+The method for the indexing (container[index]) operation
+
+impl<A> PartialOrd<VecDeque<A>> for VecDeque<A> where A: PartialOrd<A>
+fn partial_cmp(&self, other: &VecDeque<A>) -> Option<Ordering>[−]
+
+This method returns an ordering between self and other values if one exists. Read more
+
+fn lt(&self, other: &Rhs) -> bool[−]
+
+This method tests less than (for self and other) and is used by the < operator. Read more
+
+fn le(&self, other: &Rhs) -> bool[−]
+
+This method tests less than or equal to (for self and other) and is used by the <= operator. Read more
+
+fn gt(&self, other: &Rhs) -> bool[−]
+
+This method tests greater than (for self and other) and is used by the > operator. Read more
+
+fn ge(&self, other: &Rhs) -> bool[−]
+
+This method tests greater than or equal to (for self and other) and is used by the >= operator. Read more
+
+impl<A> Ord for VecDeque<A> where A: Ord
+fn cmp(&self, other: &VecDeque<A>) -> Ordering[−]
+
+This method returns an Ordering between self and other. Read more
+
+impl<A> Eq for VecDeque<A> where A: Eq
+impl<A> FromIterator<A> for VecDeque<A>
+fn from_iter<T>(iter: T) -> VecDeque<A> 
+where T: IntoIterator<Item=A>
+[−]
+
+Creates a value from an iterator. Read more
+
+impl<T> Clone for VecDeque<T> where T: Clone
+fn clone(&self) -> VecDeque<T>[−]
+
+Returns a copy of the value. Read more
+
+fn clone_from(&mut self, source: &Self)[−]
+
+Performs copy-assignment from source. Read more
+
+impl<T> Default for VecDeque<T>
+fn default() -> VecDeque<T>[−]
+
+Creates an empty VecDeque<T>.
+
+impl<A> IndexMut<usize> for VecDeque<A>
+fn index_mut(&mut self, index: usize) -> &mut A[−]
+
+The method for the mutable indexing (container[index]) operation
