@@ -1,5 +1,7 @@
 extern crate rand;
 
+use std::fs::File;
+use std::io::Read;
 use std::collections::HashMap;
 use std::vec::Vec;
 use std::collections::VecDeque;
@@ -8,54 +10,67 @@ use rand::distributions::{IndependentSample, Range};
 type Prefix = VecDeque<String>;
 type State = HashMap<Prefix, Vec<String>>;
 
-const NPREF: usize = 2;
+const NPREF: usize = 1;
 
-fn add(prefix: &mut Prefix, state: &mut State, word: &str) {
-	let p_size = prefix.len();
-	if p_size == NPREF {
-		state.entry(prefix.clone()).or_insert(Vec::new()).push(word.to_string());
-		prefix.pop_front();
+pub struct Markov {
+	state: State,
+	prefix: Prefix
+}
+
+impl Markov {
+	pub fn new() -> Markov {
+		let mut n = Markov {
+			state: State::new(),
+			prefix: Prefix::new()
+		};
+		n.pad();
+		n
 	}
-	prefix.push_back(word.to_string());
-}
 
-fn next(prefix: &mut Prefix, state: &mut State) -> String {
-	let follows = state.entry(prefix.clone()).or_insert(Vec::new());
-    let between = Range::new(0, follows.len());
-    let mut rng = rand::thread_rng();
-    println!("All of between {:?}", follows);
-	let w = &follows[between.ind_sample(&mut rng)];
-    prefix.pop_front(); // advance
-    prefix.push_back(w.to_string());
-    w.to_string()
-}
+	pub fn add(&mut self, word: &str) {
+		let p_size = self.prefix.len();
+		if p_size == NPREF {
+			self.state.entry(self.prefix.clone()).or_insert(Vec::new()).push(word.to_string());
+			self.prefix.pop_front();
+		}
+		self.prefix.push_back(word.to_string());
+	}
 
-fn pad_prefix(prefix: &mut Prefix, state: &mut State) {
-	for _ in 0..NPREF {
-		add(prefix, state, "\n");
+	pub fn finalize(&mut self) {
+		self.pad();
+	}
+
+	fn next(&mut self) -> String {
+		let follows = self.state.entry(self.prefix.clone()).or_insert(Vec::new());
+	    let between = Range::new(0, follows.len());
+	    let mut rng = rand::thread_rng();
+		let w = &follows[between.ind_sample(&mut rng)];
+	    self.prefix.pop_front(); // advance
+	    self.prefix.push_back(w.to_string());
+	    w.to_string()
+	}
+
+	fn pad(&mut self) {
+		for _ in 0..NPREF {
+			self.add("\n");
+		}
 	}
 }
 
 fn main() {
-	let mut state = State::new();
-	let mut prefix = Prefix::new();
 	
-	pad_prefix(&mut prefix, &mut state);
+	let mut m = Markov::new();
 
-	add(&mut prefix, &mut state, "a");
-	add(&mut prefix, &mut state, "brown");
-	add(&mut prefix, &mut state, "dog");
-	add(&mut prefix, &mut state, "a");
-	add(&mut prefix, &mut state, "brown");
-	add(&mut prefix, &mut state, "cat");
-	add(&mut prefix, &mut state, "a");
-	add(&mut prefix, &mut state, "brown");
-	add(&mut prefix, &mut state, "green");
-	add(&mut prefix, &mut state, "a");
-	add(&mut prefix, &mut state, "brown");
-	add(&mut prefix, &mut state, "poo");
+	let mut data = "".to_string();
+	File::open("./sample").expect("Unable to open file").read_to_string(&mut data).expect("Unable to read string");
 
-	pad_prefix(&mut prefix, &mut state);
+	for d in data.split(" ") {
+		m.add(d);
+	}
 
-	println!("{} {} {}", next(&mut prefix, &mut state),next(&mut prefix, &mut state),next(&mut prefix, &mut state));
+	m.finalize();
+
+	for _ in 0..100 {
+		print!("{} ", m.next());
+	}
 }
