@@ -10,8 +10,6 @@ use rand::distributions::{IndependentSample, Range};
 type Prefix = VecDeque<String>;
 type State = HashMap<Prefix, Vec<String>>;
 
-const NPREF: usize = 1;
-
 pub struct Markov {
 	state: State,
 	prefix: Prefix
@@ -23,13 +21,15 @@ impl Markov {
 			state: State::new(),
 			prefix: Prefix::new()
 		};
+
+		//Pad the initial prefix with two newlines 
 		n.pad();
 		n
 	}
 
 	pub fn add(&mut self, word: &str) {
 		let p_size = self.prefix.len();
-		if p_size == NPREF {
+		if p_size != 0 {
 			self.state.entry(self.prefix.clone()).or_insert(Vec::new()).push(word.to_string());
 			self.prefix.pop_front();
 		}
@@ -54,14 +54,12 @@ impl Markov {
 
 	    //Add the selected word to the prefix end
 	    self.prefix.push_back(nword.to_string());
-	    
+
 	    nword
 	}
 
 	fn pad(&mut self) {
-		for _ in 0..NPREF {
-			self.add("\n");
-		}
+		self.add("\n");
 	}
 }
 
