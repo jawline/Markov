@@ -7,6 +7,8 @@ use std::vec::Vec;
 use std::collections::VecDeque;
 use rand::distributions::{IndependentSample, Range};
 
+const LEADING_WORDS: usize = 2;
+
 type Prefix = VecDeque<String>;
 type State = HashMap<Prefix, Vec<String>>;
 
@@ -21,15 +23,27 @@ impl Markov {
 			state: State::new(),
 			prefix: Prefix::new()
 		};
-
-		//Pad the initial prefix with two newlines 
-		n.pad();
 		n
 	}
 
+	/**
+	 * For some state, prefix and word
+	 *
+	 * If the prefix is larger than LEADING_WORDS then
+	 * add a transition entry from prefix -> word then
+	 * remove the first element of prefix
+	 * 
+	 * Finally add word to the end of the prefix
+	 *
+	 * This creates a State of Prefix -> Words which has
+	 * each prefix be exactly LEADING_WORDS long.
+	 * 
+	 * Increading LEADING_WORDS will reduce variation but make
+	 * text seem more normal
+	 */
 	pub fn add(&mut self, word: &str) {
 		let p_size = self.prefix.len();
-		if p_size != 0 {
+		if p_size == LEADING_WORDS {
 			self.state.entry(self.prefix.clone()).or_insert(Vec::new()).push(word.to_string());
 			self.prefix.pop_front();
 		}
@@ -59,7 +73,9 @@ impl Markov {
 	}
 
 	fn pad(&mut self) {
-		self.add("\n");
+		for _ in 0..LEADING_WORDS {
+			self.add("\n");
+		}
 	}
 }
 
