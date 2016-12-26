@@ -40,14 +40,22 @@ impl Markov {
 		self.pad();
 	}
 
-	fn next(&mut self) -> String {
-		let follows = self.state.entry(self.prefix.clone()).or_insert(Vec::new());
+	fn select(follows: &Vec<String>) -> String {
 	    let between = Range::new(0, follows.len());
 	    let mut rng = rand::thread_rng();
-		let w = &follows[between.ind_sample(&mut rng)];
-	    self.prefix.pop_front(); // advance
-	    self.prefix.push_back(w.to_string());
-	    w.to_string()
+		follows[between.ind_sample(&mut rng)].to_string()
+	}
+
+	pub fn next(&mut self) -> String {
+		let nword = Markov::select(self.state.entry(self.prefix.clone()).or_insert(Vec::new()));
+
+		//Advance the prefix by one word
+	    self.prefix.pop_front();
+
+	    //Add the selected word to the prefix end
+	    self.prefix.push_back(nword.to_string());
+	    
+	    nword
 	}
 
 	fn pad(&mut self) {
